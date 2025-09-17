@@ -12,7 +12,12 @@ import { useWeather } from '@/context/WeatherContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { LocationResult } from '@/hooks/useLocation';
 
-const fond = require('../../assets/images/fond.jpg');
+// Fonds météo
+const fondDefault = require('../../assets/images/fond.jpg');
+const fondSoleil = require('../../assets/images/soleil.jpg');
+const fondPluie = require('../../assets/images/pluie.jpg');
+const fondNeige = require('../../assets/images/neige.jpg');
+const fondNuage = require('../../assets/images/nuage.jpg');
 
 export default function HomeScreen() {
   const {
@@ -67,6 +72,20 @@ export default function HomeScreen() {
     setError(errorMessage);
   };
 
+  // Fonction pour choisir le fond selon le weatherCode
+  const getBackgroundImage = (weatherCode?: number) => {
+    if (!weatherCode) return fondDefault;
+
+    if ([0, 1].includes(weatherCode)) return fondSoleil; // ciel clair
+    if ([2, 3].includes(weatherCode)) return fondNuage;  // nuageux
+    if (weatherCode >= 45 && weatherCode <= 67) return fondPluie; // pluie / bruine
+    if (weatherCode >= 71 && weatherCode <= 77) return fondNeige; // neige
+    if (weatherCode >= 80 && weatherCode <= 82) return fondPluie; // averses
+    if (weatherCode >= 95) return fondPluie; // orages
+
+    return fondDefault;
+  };
+
   // Formater les heures du lever et coucher du soleil
   const formatTime = (isoString?: string) => {
     if (!isoString) return '';
@@ -78,7 +97,7 @@ export default function HomeScreen() {
   const sunset = formatTime(weatherData?.daily?.sunset?.[0]);
 
   return (
-    <Container backgroundImage={fond}>
+    <Container backgroundImage={getBackgroundImage(weatherData?.current_weather?.weathercode)}>
       {/* Section météo principale */}
       <Section style={{ flex: 3, paddingBottom: 16 }}>
         {isLoading ? (
@@ -164,4 +183,3 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
- 
